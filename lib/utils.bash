@@ -2,10 +2,9 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for aliae.
 GH_REPO="https://github.com/jandedobbeleer/aliae"
 TOOL_NAME="aliae"
-TOOL_TEST="aliae --help"
+TOOL_TEST="aliae --version"
 
 fail() {
 	echo -e "asdf-$TOOL_NAME: $*"
@@ -14,7 +13,6 @@ fail() {
 
 curl_opts=(-fsSL)
 
-# NOTE: You might want to remove this if aliae is not hosted on GitHub releases.
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
 	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
 fi
@@ -38,9 +36,9 @@ get_os() {
 	local os
 	os=$(uname -s | tr '[:upper:]' '[:lower:]')
 	case "$os" in
-		linux*) echo "linux" ;;
-		darwin*) echo "darwin" ;;
-		*) fail "Unsupported OS: $os" ;;
+	linux*) echo "linux" ;;
+	darwin*) echo "darwin" ;;
+	*) fail "Unsupported OS: $os" ;;
 	esac
 }
 
@@ -48,10 +46,10 @@ get_arch() {
 	local arch
 	arch=$(uname -m)
 	case "$arch" in
-		x86_64 | amd64) echo "amd64" ;;
-		aarch64 | arm64) echo "arm64" ;;
-		arm*) echo "arm" ;;
-		*) fail "Unsupported architecture: $arch" ;;
+	x86_64 | amd64) echo "amd64" ;;
+	aarch64 | arm64) echo "arm64" ;;
+	arm*) echo "arm" ;;
+	*) fail "Unsupported architecture: $arch" ;;
 	esac
 }
 
@@ -68,6 +66,7 @@ download_release() {
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+	chmod +x "$filename"
 }
 
 install_version() {
@@ -83,11 +82,10 @@ install_version() {
 		mkdir -p "$install_path"
 		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
 
-		# TODO: Assert aliae executable exists.
 		local tool_cmd
 		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
 		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
-
+		rm -rf "$ASDF_DOWNLOAD_PATH" || fail "Failed to remove the download directory."
 		echo "$TOOL_NAME $version installation was successful!"
 	) || (
 		rm -rf "$install_path"
