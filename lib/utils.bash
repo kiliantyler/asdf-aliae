@@ -38,9 +38,9 @@ get_os() {
 	local os
 	os=$(uname -s | tr '[:upper:]' '[:lower:]')
 	case "$os" in
-		linux*) echo "linux" ;;
-		darwin*) echo "darwin" ;;
-		*) fail "Unsupported OS: $os" ;;
+	linux*) echo "linux" ;;
+	darwin*) echo "darwin" ;;
+	*) fail "Unsupported OS: $os" ;;
 	esac
 }
 
@@ -48,10 +48,10 @@ get_arch() {
 	local arch
 	arch=$(uname -m)
 	case "$arch" in
-		x86_64 | amd64) echo "amd64" ;;
-		aarch64 | arm64) echo "arm64" ;;
-		arm*) echo "arm" ;;
-		*) fail "Unsupported architecture: $arch" ;;
+	x86_64 | amd64) echo "amd64" ;;
+	aarch64 | arm64) echo "arm64" ;;
+	arm*) echo "arm" ;;
+	*) fail "Unsupported architecture: $arch" ;;
 	esac
 }
 
