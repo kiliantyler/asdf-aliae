@@ -27,13 +27,32 @@ sort_versions() {
 list_github_tags() {
 	git ls-remote --tags --refs "$GH_REPO" |
 		grep -o 'refs/tags/.*' | cut -d/ -f3- |
-		sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+		sed 's/^v//'
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if aliae has other means of determining installable versions.
 	list_github_tags
+}
+
+get_os() {
+	local os
+	os=$(uname -s | tr '[:upper:]' '[:lower:]')
+	case "$os" in
+		linux*) echo "linux" ;;
+		darwin*) echo "darwin" ;;
+		*) fail "Unsupported OS: $os" ;;
+	esac
+}
+
+get_arch() {
+	local arch
+	arch=$(uname -m)
+	case "$arch" in
+		x86_64 | amd64) echo "amd64" ;;
+		aarch64 | arm64) echo "arm64" ;;
+		arm*) echo "arm" ;;
+		*) fail "Unsupported architecture: $arch" ;;
+	esac
 }
 
 download_release() {
@@ -41,8 +60,11 @@ download_release() {
 	version="$1"
 	filename="$2"
 
-	# TODO: Adapt the release URL convention for aliae
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	local os arch
+	os=$(get_os)
+	arch=$(get_arch)
+
+	url="$GH_REPO/releases/download/v$version/aliae-$os-$arch"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
